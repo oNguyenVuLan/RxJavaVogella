@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.stock_update_item.view.*
 /**
  * Created by FRAMGIA\nguyen.vu.lan on 11/17/17.
  */
-public class StockDataAdapter(var list: MutableList<StockUpdate>) : RecyclerView.Adapter<StockDataAdapter.StockUpdateViewHolder>() {
+class StockDataAdapter( list: MutableList<StockUpdate>) : RecyclerView.Adapter<StockDataAdapter.StockUpdateViewHolder>() {
 
     var listData = list
     override fun getItemCount(): Int {
@@ -21,11 +21,6 @@ public class StockDataAdapter(var list: MutableList<StockUpdate>) : RecyclerView
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockUpdateViewHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.stock_update_item, parent, false)
         return StockUpdateViewHolder(v)
-    }
-
-   public fun add(stockUpdate: StockUpdate) {
-        listData.add(stockUpdate)
-        notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: StockUpdateViewHolder, position: Int) {
