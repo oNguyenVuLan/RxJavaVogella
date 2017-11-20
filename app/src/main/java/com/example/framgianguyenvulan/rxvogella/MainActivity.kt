@@ -5,8 +5,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.widget.TextView
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
+import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,13 +27,14 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView(): Unit {
         var layoutManager = LinearLayoutManager(this)
         stock_updates_recycler_view.layoutManager = layoutManager
-        var list = ArrayList<String>()
-        Observable.just("APPLE", "GOOGLE", "FACEBOOK")
-                .subscribe { t: String ->
-                    list.add(t)
-
+        var listdata = mutableListOf<StockUpdate>()
+        Observable.just(StockUpdate("GOOGLE", 12.43, Date()),
+                StockUpdate("APPL", 645.1, Date()),
+                StockUpdate("TWTR", 1.43, Date()))
+                .subscribe { t: StockUpdate ->
+                    listdata.add(t)
                 }
-        stock_updates_recycler_view.adapter = StockDataAdapter(list)
+        stock_updates_recycler_view.adapter=StockDataAdapter(listdata)
     }
 }
 
