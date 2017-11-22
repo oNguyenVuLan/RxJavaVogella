@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
                     listdata.add(t)
                 }
         stock_updates_recycler_view.adapter=StockDataAdapter(listdata)
-
     }
 }
 
