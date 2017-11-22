@@ -6,9 +6,15 @@ import android.support.v7.widget.LinearLayoutManager
 import android.widget.TextView
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import io.reactivex.subjects.PublishSubject
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         initRecyclerView()
     }
 
-    private fun initRecyclerView(): Unit {
+    private fun initRecyclerView() {
         var layoutManager = LinearLayoutManager(this)
         stock_updates_recycler_view.layoutManager = layoutManager
         var listdata = mutableListOf<StockUpdate>()
@@ -35,6 +41,7 @@ class MainActivity : AppCompatActivity() {
                     listdata.add(t)
                 }
         stock_updates_recycler_view.adapter=StockDataAdapter(listdata)
+
     }
 }
 
