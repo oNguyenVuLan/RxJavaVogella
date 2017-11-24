@@ -3,17 +3,17 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.widget.TextView
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
+import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
+import com.example.framgianguyenvulan.rxvogella.api.WeatherService
 import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
-import io.reactivex.BackpressureStrategy
+import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import io.reactivex.subjects.PublishSubject
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,13 +34,28 @@ class MainActivity : AppCompatActivity() {
         var layoutManager = LinearLayoutManager(this)
         stock_updates_recycler_view.layoutManager = layoutManager
         var listdata = mutableListOf<StockUpdate>()
+        /*
         Observable.just(StockUpdate("GOOGLE", 12.43, Date()),
                 StockUpdate("APPL", 645.1, Date()),
                 StockUpdate("TWTR", 1.43, Date()))
                 .subscribe { t: StockUpdate ->
                     listdata.add(t)
                 }
-        stock_updates_recycler_view.adapter=StockDataAdapter(listdata)
+                */
+
+        createService()
+        stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
+    }
+
+    private fun createService() {
+        var weatherService: WeatherService = ServiceFactory().create()
+        var data = weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+
+        data.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { t: WeatherData
+                    ->
+                    Log.e("", "" + t.coord!!.lat) }
     }
 }
 
