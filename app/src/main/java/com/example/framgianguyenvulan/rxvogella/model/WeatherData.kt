@@ -11,5 +11,6 @@ class WeatherData : Serializable {
     var cod: Int = 0
     var coord: Coord? = null
     var main: Main? = null
+    var weather:List<Weather>?=null
     var wind: Wind? = null
 }

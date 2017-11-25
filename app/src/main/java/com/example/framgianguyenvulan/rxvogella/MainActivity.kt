@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { t: WeatherData
                     ->
+                    textView.text= t.weather!![0].description
                     Log.e("", "" + t.coord!!.lat) }
     }
 }
