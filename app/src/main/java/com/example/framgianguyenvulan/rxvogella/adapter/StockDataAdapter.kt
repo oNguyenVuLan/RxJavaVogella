@@ -30,7 +30,6 @@ class StockDataAdapter( list: MutableList<StockUpdate>) : RecyclerView.Adapter<S
     class StockUpdateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindData(stockUpdate: StockUpdate) {
             itemView.stock_item_symbol.text = stockUpdate.stockSymbol
-            itemView.stock_item_date.text = stockUpdate.date.toString()
             itemView.stock_item_price.text = stockUpdate.price.toString()
         }
     }

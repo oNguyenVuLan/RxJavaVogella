@@ -14,6 +14,7 @@ import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
 
     lateinit var textView: TextView
-
+    var listdata = mutableListOf<StockUpdate>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         var layoutManager = LinearLayoutManager(this)
         stock_updates_recycler_view.layoutManager = layoutManager
-        var listdata = mutableListOf<StockUpdate>()
+
         /*
         Observable.just(StockUpdate("GOOGLE", 12.43, Date()),
                 StockUpdate("APPL", 645.1, Date()),
@@ -61,13 +62,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 .subscribeOn(Schedulers.io())
                 .map<List<Weather>> { t: WeatherData -> t.weather!! }
-                .flatMap(Observable::fromIterable)
-                .doOnNext(this::saveWeather)
-
+                .flatMap { t -> Observable.fromIterable(t) }
+                //.doOnNext(this::saveWeather)
+                .map {t -> StockUpdate.create(t)  }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { t: WeatherData ->
-                    textView.text= t.weather!![0].description
-                    Log.e("", "" + t.coord!!.lat) }
+                .subscribe({ t ->
+                    textView.text= t.stockSymbol
+                    listdata.add(t)
+                    })
     }
 
     private fun saveWeather(weather:Weather){
