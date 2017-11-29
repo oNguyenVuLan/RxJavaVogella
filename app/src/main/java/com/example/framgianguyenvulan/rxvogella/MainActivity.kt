@@ -8,12 +8,15 @@ import android.widget.TextView
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
 import com.example.framgianguyenvulan.rxvogella.api.WeatherService
+import com.example.framgianguyenvulan.rxvogella.db.StorIOFactory
 import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
+import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -49,14 +52,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun createService() {
         var weatherService: WeatherService = ServiceFactory().create()
-        var data = weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+        //var data = weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
 
-        data.subscribeOn(Schedulers.io())
+        Observable.interval(0, 5, TimeUnit.SECONDS)
+                .flatMap<WeatherData> {
+                 it->weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+                        .toObservable()
+                }
+                .subscribeOn(Schedulers.io())
+                .map<List<Weather>> { t: WeatherData -> t.weather!! }
+                .flatMap(Observable::fromIterable)
+                .doOnNext(this::saveWeather)
+
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { t: WeatherData
-                    ->
+                .subscribe { t: WeatherData ->
                     textView.text= t.weather!![0].description
                     Log.e("", "" + t.coord!!.lat) }
+    }
+
+    private fun saveWeather(weather:Weather){
+        StorIOFactory.get(this)?.put()
+                ?.`object`(weather)
+                ?.prepare()
+                ?.asRxSingle()
+                ?.subscribe()
     }
 }
 

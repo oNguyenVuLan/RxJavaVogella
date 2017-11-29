@@ -2,6 +2,7 @@ package com.example.framgianguyenvulan.rxvogella.api
 
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,5 +12,5 @@ import retrofit2.http.Query
 interface WeatherService {
     @GET("weather?")
     fun getWeatherData(@Query("lat") lat: String, @Query("lon") lon: String,
-                       @Query("appid") appid: String): Observable<WeatherData>
+                       @Query("appid") appid: String): Single<WeatherData>
 }
