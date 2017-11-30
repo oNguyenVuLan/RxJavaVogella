@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
                 ?.prepare()
                 ?.asRxSingle()
                 ?.subscribe()
+        //
     }
 }
 
