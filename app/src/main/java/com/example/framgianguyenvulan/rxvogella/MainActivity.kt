@@ -3,6 +3,7 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.widget.TextView
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
@@ -13,6 +14,8 @@ import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var textView: TextView
     var listdata = mutableListOf<StockUpdate>()
+    var weather:Weather?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -59,11 +63,12 @@ class MainActivity : AppCompatActivity() {
                             .toObservable()
                 }
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .map<List<Weather>> { t: WeatherData -> t.weather!! }
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
-                .observeOn(AndroidSchedulers.mainThread())
+
                 .subscribe({ t ->
                     textView.text = t.stockSymbol
                     listdata.add(t)
@@ -77,6 +82,13 @@ class MainActivity : AppCompatActivity() {
                 ?.asRxSingle()
                 ?.subscribe()
         //
+    }
+
+    private fun returnError(){
+        Observable.error<String> {Error("crash")  }
+                .onErrorReturn { t: Throwable -> "Return" }
+                .onErrorReturnItem("123")
+                .subscribe { t: String -> Log.e("123","123") }
     }
 }
 

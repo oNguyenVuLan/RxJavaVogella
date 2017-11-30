@@ -2,4 +2,7 @@
     <string name="app_name">RxVogella</string>
     <string name="title_activity_rx_java_simple">RxJavaSimpleActivity</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="no_network_connection">No network connection</string>
+    <string name="no_host_connection">No host connection</string>
+    <string name="io_exception">IO exception</string>
 </resources>
