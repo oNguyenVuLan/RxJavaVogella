@@ -37,12 +37,16 @@ class ResponseException : RuntimeException {
             return ResponseException(Type.HTTP, response)
         }
 
-        fun getNetworkError(response: Response<*>): ResponseException {
+        fun getNetworkError(response: Throwable): ResponseException {
             return ResponseException(Type.NETWORK, response)
         }
 
-        fun getUnexpectedError(response: Response<*>): ResponseException {
-            return ResponseException(Type.UNEXPECTED, response)
+        fun getServerError(response: ErrorResponse): ResponseException {
+            return ResponseException(Type.SERVER, response)
+        }
+
+        fun getUnexpectedError(throwable: Throwable): ResponseException {
+            return ResponseException(Type.UNEXPECTED, throwable)
         }
     }
 

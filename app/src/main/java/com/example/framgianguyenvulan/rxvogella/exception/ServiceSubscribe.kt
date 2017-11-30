@@ -7,7 +7,7 @@ import java.io.Serializable
 /**
  * Created by FRAMGIA\nguyen.vu.lan on 11/30/17.
  */
-abstract class CallbackWrapper<T:Serializable> : DisposableObserver<T>() {
+abstract class ServiceSubscribe<T:Serializable> : DisposableObserver<T>() {
     override fun onComplete() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
