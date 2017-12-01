@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
 import com.example.framgianguyenvulan.rxvogella.api.WeatherService
@@ -14,8 +15,8 @@ import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
@@ -23,10 +24,11 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
-
     lateinit var textView: TextView
     var listdata = mutableListOf<StockUpdate>()
-    var weather:Weather?=null
+    var weather: Weather? = null
+    var disposable: Disposable? = null
+    var compositeDisposable: CompositeDisposable = CompositeDisposable()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -57,10 +59,16 @@ class MainActivity : AppCompatActivity() {
         var weatherService: WeatherService = ServiceFactory().create()
         //var data = weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
 
-        Observable.interval(0, 5, TimeUnit.SECONDS)
+        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMap<WeatherData> { it ->
                     weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
                             .toObservable()
+                }
+                .doOnError { t: Throwable ->
+                    Toast.makeText(this,
+                            "We couldn't reach internet - falling back to local data",
+                            Toast.LENGTH_SHORT)
+                            .show()
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -68,11 +76,11 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
-
                 .subscribe({ t ->
                     textView.text = t.stockSymbol
                     listdata.add(t)
                 })
+        compositeDisposable.add(disposable)
     }
 
     private fun saveWeather(weather: Weather) {
@@ -84,11 +92,16 @@ class MainActivity : AppCompatActivity() {
         //
     }
 
-    private fun returnError(){
-        Observable.error<String> {Error("crash")  }
+    override fun onDestroy() {
+        compositeDisposable.dispose()
+        super.onDestroy()
+    }
+
+    private fun returnError() {
+        Observable.error<String> { Error("crash") }
                 .onErrorReturn { t: Throwable -> "Return" }
                 .onErrorReturnItem("123")
-                .subscribe { t: String -> Log.e("123","123") }
+                .subscribe { t: String -> Log.e("123", "123") }
     }
 }
 
