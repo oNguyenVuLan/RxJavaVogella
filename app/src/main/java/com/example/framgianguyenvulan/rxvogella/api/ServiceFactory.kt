@@ -1,6 +1,5 @@
 package com.example.framgianguyenvulan.rxvogella.api
 
-import com.example.framgianguyenvulan.rxvogella.exception.ServiceErrorHandlerFactory
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -28,7 +27,6 @@ class ServiceFactory {
             .client(client)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
-            .addCallAdapterFactory(ServiceErrorHandlerFactory())
             .baseUrl("http://samples.openweathermap.org/data/2.5/")
             .build()
 }
