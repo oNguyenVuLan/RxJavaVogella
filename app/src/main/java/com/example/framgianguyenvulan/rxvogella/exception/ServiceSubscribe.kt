@@ -1,26 +1,36 @@
 package com.example.framgianguyenvulan.rxvogella.exception
 
+import android.text.TextUtils
 import io.reactivex.observers.DisposableObserver
-import retrofit2.Response
 import java.io.Serializable
 
 /**
  * Created by FRAMGIA\nguyen.vu.lan on 11/30/17.
  */
-abstract class ServiceSubscribe<T:Serializable> : DisposableObserver<T>() {
+abstract class ServiceSubscribe<T : BaseResponse> : DisposableObserver<T>() {
+    var response: T? = null
     override fun onComplete() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if(!TextUtils.isEmpty(response!!.code)&&!TextUtils.isEmpty(response!!.message)){
+            onError(ResponseException(ResponseException.Type.SERVER,
+                    ErrorResponse(response!!.code,response!!.message)))
+        }else{
+            onSuccess(response!!)
+        }
     }
 
-    override fun onError(e: Throwable?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onError(e: Throwable) {
+        if(e is ResponseException){
+            onError(e)
+        }else{
+            onError(ResponseException.getUnexpectedError(e))
+        }
     }
 
     override fun onNext(t: T) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        response = t
     }
 
-     abstract fun onSuccess( item:T)
+    abstract fun onSuccess(item: T)
 
-    abstract  fun onError()
+    abstract fun onError(error:ResponseException)
 }
