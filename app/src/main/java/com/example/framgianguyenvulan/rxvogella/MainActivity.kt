@@ -3,13 +3,11 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
 import com.example.framgianguyenvulan.rxvogella.api.WeatherService
-import com.example.framgianguyenvulan.rxvogella.db.StorIOFactory
 import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
 import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
@@ -20,8 +18,10 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import twitter4j.*
 import twitter4j.conf.Configuration
 import twitter4j.conf.ConfigurationBuilder
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 
@@ -44,16 +44,6 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         var layoutManager = LinearLayoutManager(this)
         stock_updates_recycler_view.layoutManager = layoutManager
-
-        /*
-        Observable.just(StockUpdate("GOOGLE", 12.43, Date()),
-                StockUpdate("APPL", 645.1, Date()),
-                StockUpdate("TWTR", 1.43, Date()))
-                .subscribe { t: StockUpdate ->
-                    listdata.add(t)
-                }
-                */
-
         createService()
         stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
 
@@ -97,10 +87,46 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    fun configuringTwitter(){
-//        var con:Configuration=ConfigurationBuilder()
-//                .setDebugEnabled(true)
-//                .setOAuthConsumerKey("")
+    fun getConfiguringTwitter(): Configuration {
+        return ConfigurationBuilder()
+                .setDebugEnabled(BuildConfig.DEBUG)
+                .setOAuthConsumerKey(BuildConfig.CONSUMER_KEY)
+                .setOAuthConsumerSecret(BuildConfig.CONSUMER_SECRET)
+                .setOAuthAccessToken(BuildConfig.ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(BuildConfig.ACCESS_TOKEN_SECRET)
+                .build()
+
+
+    }
+
+    fun observeTwitterStream(config: Configuration, filterQuery: FilterQuery): Observable<Status> {
+        return Observable.create { e ->
+            var twitterStream = TwitterStreamFactory(getConfiguringTwitter()).instance
+            e.setCancellable { Schedulers.io().scheduleDirect { twitterStream.cleanUp() } }
+            var listener: StatusListener = object : StatusListener {
+                override fun onTrackLimitationNotice(numberOfLimitedStatuses: Int) {
+                }
+
+                override fun onStallWarning(warning: StallWarning) {
+                }
+
+                override fun onException(ex: Exception) {
+                }
+
+                override fun onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {
+                }
+
+                override fun onStatus(status: Status) {
+                    e.onNext(status)
+                }
+
+                override fun onScrubGeo(userId: Long, upToStatusId: Long) {
+                }
+
+            }
+            twitterStream.addListener(listener)
+            twitterStream.filter(filterQuery)
+        }
     }
 
 }
