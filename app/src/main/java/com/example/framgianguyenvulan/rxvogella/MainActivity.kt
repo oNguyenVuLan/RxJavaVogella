@@ -3,7 +3,7 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
@@ -52,8 +52,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 */
 
-        createService()
-        stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
+        //createService()
+        //stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
+        cleanUp()
     }
 
     private fun createService() {
@@ -103,11 +104,11 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun returnError() {
-        Observable.error<String> { Error("crash") }
-                .onErrorReturn { t: Throwable -> "Return" }
-                .onErrorReturnItem("123")
-                .subscribe { t: String -> Log.e("123", "123") }
+    private fun cleanUp() {
+        Observable.create { e: ObservableEmitter<View> ->
+            e.setCancellable({ hello_world_salute.setOnClickListener(null) })
+            hello_world_salute.setOnClickListener({ v -> e.onNext(v) })
+        }
     }
 }
 
