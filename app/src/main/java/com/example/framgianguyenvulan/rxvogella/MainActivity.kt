@@ -20,6 +20,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import twitter4j.conf.Configuration
+import twitter4j.conf.ConfigurationBuilder
 import java.util.concurrent.TimeUnit
 
 
@@ -52,9 +54,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 */
 
-        //createService()
-        //stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
-        cleanUp()
+        createService()
+        stock_updates_recycler_view.adapter = StockDataAdapter(listdata)
+
     }
 
     private fun createService() {
@@ -90,26 +92,17 @@ class MainActivity : AppCompatActivity() {
         compositeDisposable.add(disposable)
     }
 
-    private fun saveWeather(weather: Weather) {
-        StorIOFactory.get(this)?.put()
-                ?.`object`(weather)
-                ?.prepare()
-                ?.asRxSingle()
-                ?.subscribe()
-        //
-    }
-
     override fun onDestroy() {
         compositeDisposable.dispose()
         super.onDestroy()
     }
 
-    private fun cleanUp() {
-        Observable.create { e: ObservableEmitter<View> ->
-            e.setCancellable({ hello_world_salute.setOnClickListener(null) })
-            hello_world_salute.setOnClickListener({ v -> e.onNext(v) })
-        }
+    fun configuringTwitter(){
+//        var con:Configuration=ConfigurationBuilder()
+//                .setDebugEnabled(true)
+//                .setOAuthConsumerKey("")
     }
+
 }
 
 
