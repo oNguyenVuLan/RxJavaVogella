@@ -15,7 +15,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "API_KEY", "\"${API_KEY}\""
+        buildConfigField "String", "CONSUMER_KEY", "\"${OAuthConsumerKey}\""
+        buildConfigField "String", "CONSUMER_SECRET", "\"${OAuthConsumerSecret}\""
+        buildConfigField "String", "ACCESS_TOKEN", "\"${OAuthAccessToken}\""
+        buildConfigField "String", "ACCESS_TOKEN_SECRET", "\"${AccessTokenSecret}\""
     }
     buildTypes {
         release {
