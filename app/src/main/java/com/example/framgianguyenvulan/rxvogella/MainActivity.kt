@@ -3,6 +3,7 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
@@ -26,7 +27,9 @@ import java.lang.Exception
 import java.util.concurrent.TimeUnit
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity
 import io.reactivex.plugins.RxJavaPlugins
-
+import java.util.*
+import java.util.concurrent.Callable
+import android.util.Pair
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,17 +66,23 @@ class MainActivity : AppCompatActivity() {
             e.onComplete()
         }
 
-        Observable.merge( Observable.interval(0, 5, TimeUnit.SECONDS)
-                .flatMap<WeatherData> { it ->
-                    weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
-                            .toObservable()
-                }, observeTwitterStream(getConfiguringTwitter(),filterQuery))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError (ErrorHandler.get())
-                .observeOn(Schedulers.io())
+        Observable.just("ID1", "ID2", "ID3")
+                .map { id -> Observable.fromCallable(mockHttpRequest(id)) }
+                .subscribe({ e -> Log.e("",e.toString()) })
+        Observable.just("UserID1", "UserID2", "UserID3","UserID3")
+                .map { id -> Pair.create(id, id + "-access-token") }
+                .subscribe({ pair -> Log.e("subscribe-subscribe", pair.second) })
+//        Observable.merge( Observable.interval(0, 5, TimeUnit.SECONDS)
+//                .flatMap<WeatherData> { it ->
+//                    weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+//                            .toObservable()
+//                }, observeTwitterStream(getConfiguringTwitter(),filterQuery))
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .doOnError (ErrorHandler.get())
+//                .observeOn(Schedulers.io())
 
-        compositeDisposable.add(disposable)
+//        compositeDisposable.add(disposable)
     }
 
     override fun onDestroy() {
@@ -126,6 +135,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun mockHttpRequest(id: String): Callable<Date> {
+        return Callable<Date> { Date() }
+    }
 }
 
 
