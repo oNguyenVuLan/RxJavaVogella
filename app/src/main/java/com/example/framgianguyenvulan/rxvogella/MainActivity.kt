@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.example.framgianguyenvulan.rxvogella.adapter.StockDataAdapter
 import com.example.framgianguyenvulan.rxvogella.api.ServiceFactory
 import com.example.framgianguyenvulan.rxvogella.api.WeatherService
+import com.example.framgianguyenvulan.rxvogella.model.ErrorHandler
 import com.example.framgianguyenvulan.rxvogella.model.StockUpdate
 import com.example.framgianguyenvulan.rxvogella.model.Weather
 import com.example.framgianguyenvulan.rxvogella.model.WeatherData
@@ -23,6 +24,8 @@ import twitter4j.conf.Configuration
 import twitter4j.conf.ConfigurationBuilder
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity
+import io.reactivex.plugins.RxJavaPlugins
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         textView = findViewById(R.id.hello_world_salute)
+        RxJavaPlugins.setErrorHandler(ErrorHandler.get())
         Observable.just("Hello")
                 .subscribe { t: String -> textView.text = t }
         initRecyclerView()
@@ -58,27 +62,17 @@ class MainActivity : AppCompatActivity() {
             e.onNext(2)
             e.onComplete()
         }
-        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
+
+        Observable.merge( Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMap<WeatherData> { it ->
                     weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
                             .toObservable()
-                }
-                .doOnError { t: Throwable ->
-                    Toast.makeText(this,
-                            "We couldn't reach internet - falling back to local data",
-                            Toast.LENGTH_SHORT)
-                            .show()
-                }
+                }, observeTwitterStream(getConfiguringTwitter(),filterQuery))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { t: WeatherData -> t.weather!! }
-                .flatMap { t -> Observable.fromIterable(t) }
-                //.doOnNext(this::saveWeather)
-                .map { t -> StockUpdate.create(t) }
-                .subscribe({ t ->
-                    textView.text = t.stockSymbol
-                    listdata.add(t)
-                })
+                .doOnError (ErrorHandler.get())
+                .observeOn(Schedulers.io())
+
         compositeDisposable.add(disposable)
     }
 
@@ -99,9 +93,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    val filterQuery=FilterQuery()
+            .track("","Google")
+            .language("en")
     fun observeTwitterStream(config: Configuration, filterQuery: FilterQuery): Observable<Status> {
         return Observable.create { e ->
-            var twitterStream = TwitterStreamFactory(getConfiguringTwitter()).instance
+            var twitterStream = TwitterStreamFactory(config).instance
             e.setCancellable { Schedulers.io().scheduleDirect { twitterStream.cleanUp() } }
             var listener: StatusListener = object : StatusListener {
                 override fun onTrackLimitationNotice(numberOfLimitedStatuses: Int) {

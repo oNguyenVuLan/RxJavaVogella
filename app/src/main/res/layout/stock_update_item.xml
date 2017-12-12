@@ -33,7 +33,16 @@
             android:layout_marginTop="5dp"
             android:text="2012-12-01"
             android:textSize="12sp" />
+
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/stock_item_twitter_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Very long Twitter update that is going
+to be displayed as a message"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="18sp" />
 </android.support.v7.widget.CardView>
 
