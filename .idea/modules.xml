@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RxJavaVogella.iml" filepath="$PROJECT_DIR$/RxJavaVogella.iml" />
-      <module fileurl="file://$PROJECT_DIR$/RxVogella.iml" filepath="$PROJECT_DIR$/RxVogella.iml" />
       <module fileurl="file://F:\SynAndroidProject\RxJavaVogella\RxVogella.iml" filepath="F:\SynAndroidProject\RxJavaVogella\RxVogella.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

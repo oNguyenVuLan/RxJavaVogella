@@ -93,10 +93,10 @@ class MainActivity : AppCompatActivity() {
     fun getConfiguringTwitter(): Configuration {
         return ConfigurationBuilder()
                 .setDebugEnabled(BuildConfig.DEBUG)
-                .setOAuthConsumerKey(BuildConfig.CONSUMER_KEY)
-                .setOAuthConsumerSecret(BuildConfig.CONSUMER_SECRET)
-                .setOAuthAccessToken(BuildConfig.ACCESS_TOKEN)
-                .setOAuthAccessTokenSecret(BuildConfig.ACCESS_TOKEN_SECRET)
+//                .setOAuthConsumerKey(BuildConfig.CONSUMER_KEY)
+//                .setOAuthConsumerSecret(BuildConfig.CONSUMER_SECRET)
+//                .setOAuthAccessToken(BuildConfig.ACCESS_TOKEN)
+//                .setOAuthAccessTokenSecret(BuildConfig.ACCESS_TOKEN_SECRET)
                 .build()
 
 
@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     private fun mockHttpRequest(id: String): Callable<Date> {
         return Callable<Date> { Date() }
     }
+
 }
 
 
