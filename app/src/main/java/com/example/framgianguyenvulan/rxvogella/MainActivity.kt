@@ -3,6 +3,7 @@ package com.example.framgianguyenvulan.rxvogella
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.text.TextUtils
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
@@ -88,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
+                .filter{t -> !TextUtils.isEmpty(t.twitterStatus) }
                 .subscribe({ t ->
                     textView.text = t.stockSymbol
                     listdata.add(t)
