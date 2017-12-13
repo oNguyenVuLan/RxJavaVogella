@@ -1,5 +1,6 @@
 package com.example.framgianguyenvulan.rxvogella
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -19,6 +20,7 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -73,7 +75,12 @@ class MainActivity : AppCompatActivity() {
 //        Observable.just("UserID1", "UserID2", "UserID3","UserID3")
 //                .map { id -> Pair.create(id, id + "-access-token") }
 //                .subscribe({ pair -> Log.e("subscribe-subscribe", pair.second) })
-        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
+        disposable = extractObservable(weatherService)
+        compositeDisposable.add(disposable)
+    }
+
+    private fun extractObservable(weatherService: WeatherService): Disposable? {
+        return Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMap<WeatherData> { it ->
                     weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
                             .toObservable()
@@ -94,10 +101,9 @@ class MainActivity : AppCompatActivity() {
                     textView.text = t.stockSymbol
                     listdata.add(t)
                 })
-        compositeDisposable.add(disposable)
     }
 
-    private fun testFlatMaybe() {
+    private fun testFlatMaybe(){
         var weatherService: WeatherService = ServiceFactory().create()
         disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMap<WeatherData> { it ->
@@ -116,19 +122,15 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
-                .flatMapMaybe { t: StockUpdate ->
-                    Observable.fromArray(t)
-                            .filter { t -> extractionSymbol(t) }
-                            .map { t -> t }
-                            .firstElement()
+                .flatMapMaybe {
+                    t: StockUpdate ->Observable.fromArray(t)
+                        .filter{t -> TextUtils.isEmpty(t.stockSymbol) }
+                        .map{t->t}
+                        .firstElement()
                 }
-                .subscribe({ t -> Log.e("", "" + t.twitterStatus) })
+                .subscribe({t -> Log.e("",""+t.twitterStatus) })
         compositeDisposable.add(disposable)
     }
-
-    private fun extractionSymbol(t: StockUpdate) =
-            TextUtils.isEmpty(t.stockSymbol)
-
     override fun onDestroy() {
         compositeDisposable.dispose()
         super.onDestroy()
