@@ -18,18 +18,16 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import twitter4j.*
 import twitter4j.conf.Configuration
 import twitter4j.conf.ConfigurationBuilder
 import java.lang.Exception
-import java.util.concurrent.TimeUnit
-import com.trello.rxlifecycle2.components.support.RxAppCompatActivity
-import io.reactivex.plugins.RxJavaPlugins
 import java.util.*
 import java.util.concurrent.Callable
-import android.util.Pair
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         Observable.just("Hello")
                 .subscribe { t: String -> textView.text = t }
         initRecyclerView()
+        //testConcat()
     }
 
     private fun initRecyclerView() {
@@ -66,23 +65,34 @@ class MainActivity : AppCompatActivity() {
             e.onComplete()
         }
 
-        Observable.just("ID1", "ID2", "ID3")
-                .map { id -> Observable.fromCallable(mockHttpRequest(id)) }
-                .subscribe({ e -> Log.e("",e.toString()) })
-        Observable.just("UserID1", "UserID2", "UserID3","UserID3")
-                .map { id -> Pair.create(id, id + "-access-token") }
-                .subscribe({ pair -> Log.e("subscribe-subscribe", pair.second) })
-//        Observable.merge( Observable.interval(0, 5, TimeUnit.SECONDS)
-//                .flatMap<WeatherData> { it ->
-//                    weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
-//                            .toObservable()
-//                }, observeTwitterStream(getConfiguringTwitter(),filterQuery))
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .doOnError (ErrorHandler.get())
-//                .observeOn(Schedulers.io())
-
-//        compositeDisposable.add(disposable)
+//        Observable.just("ID1", "ID2", "ID3")
+//                .map { id -> Observable.fromCallable(mockHttpRequest(id)) }
+//                .subscribe({ e -> Log.e("",e.toString()) })
+//        Observable.just("UserID1", "UserID2", "UserID3","UserID3")
+//                .map { id -> Pair.create(id, id + "-access-token") }
+//                .subscribe({ pair -> Log.e("subscribe-subscribe", pair.second) })
+        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
+                .flatMap<WeatherData> { it ->
+                    weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+                            .toObservable()
+                }
+                .doOnError { t: Throwable ->
+                    Toast.makeText(this,
+                            "We couldn't reach internet - falling back to local data",
+                            Toast.LENGTH_SHORT)
+                            .show()
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map<List<Weather>> { t: WeatherData -> t.weather!! }
+                .flatMap { t -> Observable.fromIterable(t) }
+                //.doOnNext(this::saveWeather)
+                .map { t -> StockUpdate.create(t) }
+                .subscribe({ t ->
+                    textView.text = t.stockSymbol
+                    listdata.add(t)
+                })
+        compositeDisposable.add(disposable)
     }
 
     override fun onDestroy() {
@@ -102,9 +112,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val filterQuery=FilterQuery()
-            .track("","Google")
+    val filterQuery = FilterQuery()
+            .track("", "Google")
             .language("en")
+
     fun observeTwitterStream(config: Configuration, filterQuery: FilterQuery): Observable<Status> {
         return Observable.create { e ->
             var twitterStream = TwitterStreamFactory(config).instance
@@ -139,6 +150,12 @@ class MainActivity : AppCompatActivity() {
         return Callable<Date> { Date() }
     }
 
+    private fun testConcat() {
+        Observable.concat(
+                Observable.just(1, 2),
+                Observable.just(4, 3)
+        ).subscribe { t: Int -> Log.e("aa :", "" + t) }
+    }
 }
 
 
