@@ -1,6 +1,5 @@
 package com.example.framgianguyenvulan.rxvogella
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -20,7 +19,6 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -99,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         compositeDisposable.add(disposable)
     }
 
-    private fun testFlatMaybe(){
+    private fun testFlatMaybe() {
         var weatherService: WeatherService = ServiceFactory().create()
         disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMap<WeatherData> { it ->
@@ -118,15 +116,19 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
-                .flatMapMaybe {
-                    t: StockUpdate ->Observable.fromArray(t)
-                        .filter{t -> TextUtils.isEmpty(t.stockSymbol) }
-                        .map{t->t}
-                        .firstElement()
+                .flatMapMaybe { t: StockUpdate ->
+                    Observable.fromArray(t)
+                            .filter { t -> extractionSymbol(t) }
+                            .map { t -> t }
+                            .firstElement()
                 }
-                .subscribe({t -> Log.e("",""+t.twitterStatus) })
+                .subscribe({ t -> Log.e("", "" + t.twitterStatus) })
         compositeDisposable.add(disposable)
     }
+
+    private fun extractionSymbol(t: StockUpdate) =
+            TextUtils.isEmpty(t.stockSymbol)
+
     override fun onDestroy() {
         compositeDisposable.dispose()
         super.onDestroy()
