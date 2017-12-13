@@ -1,5 +1,6 @@
 package com.example.framgianguyenvulan.rxvogella
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -19,6 +20,7 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -46,6 +48,7 @@ class MainActivity : AppCompatActivity() {
                 .subscribe { t: String -> textView.text = t }
         initRecyclerView()
         //testConcat()
+        testFlatMaybe()
     }
 
     private fun initRecyclerView() {
@@ -65,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             e.onNext(2)
             e.onComplete()
         }
-
+        val trackingKeywords = arrayOf("Yahoo", "Google", "Microsoft")
 //        Observable.just("ID1", "ID2", "ID3")
 //                .map { id -> Observable.fromCallable(mockHttpRequest(id)) }
 //                .subscribe({ e -> Log.e("",e.toString()) })
@@ -89,7 +92,6 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { t -> Observable.fromIterable(t) }
                 //.doOnNext(this::saveWeather)
                 .map { t -> StockUpdate.create(t) }
-                .filter{t -> !TextUtils.isEmpty(t.twitterStatus) }
                 .subscribe({ t ->
                     textView.text = t.stockSymbol
                     listdata.add(t)
@@ -97,6 +99,34 @@ class MainActivity : AppCompatActivity() {
         compositeDisposable.add(disposable)
     }
 
+    private fun testFlatMaybe(){
+        var weatherService: WeatherService = ServiceFactory().create()
+        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
+                .flatMap<WeatherData> { it ->
+                    weatherService.getWeatherData("35", "139", "b1b15e88fa797225412429c1c50c122a1")
+                            .toObservable()
+                }
+                .doOnError { t: Throwable ->
+                    Toast.makeText(this,
+                            "We couldn't reach internet - falling back to local data",
+                            Toast.LENGTH_SHORT)
+                            .show()
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map<List<Weather>> { t: WeatherData -> t.weather!! }
+                .flatMap { t -> Observable.fromIterable(t) }
+                //.doOnNext(this::saveWeather)
+                .map { t -> StockUpdate.create(t) }
+                .flatMapMaybe {
+                    t: StockUpdate ->Observable.fromArray(t)
+                        .filter{t -> TextUtils.isEmpty(t.stockSymbol) }
+                        .map{t->t}
+                        .firstElement()
+                }
+                .subscribe({t -> Log.e("",""+t.twitterStatus) })
+        compositeDisposable.add(disposable)
+    }
     override fun onDestroy() {
         compositeDisposable.dispose()
         super.onDestroy()
@@ -157,6 +187,15 @@ class MainActivity : AppCompatActivity() {
                 Observable.just(1, 2),
                 Observable.just(4, 3)
         ).subscribe { t: Int -> Log.e("aa :", "" + t) }
+    }
+
+    private fun testGroupBy() {
+        Observable.just(
+                StockUpdate("1", 1.0, "1"),
+                StockUpdate("1", 2.0, "2"),
+                StockUpdate("2", 3.0, "3")
+        ).groupBy { t -> t.stockSymbol }
+
     }
 }
 
