@@ -13,4 +13,7 @@ interface WeatherService {
     @GET("weather?")
     fun getWeatherData(@Query("lat") lat: String, @Query("lon") lon: String,
                        @Query("appid") appid: String): Single<WeatherData>
+    @GET("weather?")
+    fun getWeather(@Query("lat") lat: String, @Query("lon") lon: String,
+                       @Query("appid") appid: String): Observable<WeatherData>
 }

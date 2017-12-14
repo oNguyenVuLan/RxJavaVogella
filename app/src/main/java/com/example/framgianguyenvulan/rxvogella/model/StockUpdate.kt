@@ -1,5 +1,6 @@
 package com.example.framgianguyenvulan.rxvogella.model
 
+import com.example.framgianguyenvulan.rxvogella.exception.BaseResponse
 import twitter4j.Status
 import java.math.BigDecimal
 import java.util.*

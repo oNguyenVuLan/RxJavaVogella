@@ -1,6 +1,7 @@
 package com.example.framgianguyenvulan.rxvogella.exception
 
 import android.text.TextUtils
+import android.util.Log
 import io.reactivex.observers.DisposableObserver
 import java.io.Serializable
 
@@ -13,8 +14,10 @@ abstract class ServiceSubscribe<T : BaseResponse> : DisposableObserver<T>() {
         if(!TextUtils.isEmpty(response!!.code)&&!TextUtils.isEmpty(response!!.message)){
             onError(ResponseException(ResponseException.Type.SERVER,
                     ErrorResponse(response!!.code,response!!.message)))
-        }else{
+        }else if(response!=null){
             onSuccess(response!!)
+        }else{
+            Log.e("","")
         }
     }
 

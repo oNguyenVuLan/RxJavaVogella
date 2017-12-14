@@ -27,6 +27,7 @@ class ServiceFactory {
             .client(client)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .addCallAdapterFactory(ServiceErrorHandlerFactory.create())
             .baseUrl("http://samples.openweathermap.org/data/2.5/")
             .build()
 }

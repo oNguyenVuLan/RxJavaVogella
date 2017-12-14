@@ -1,11 +1,12 @@
 package com.example.framgianguyenvulan.rxvogella.model
 
+import com.example.framgianguyenvulan.rxvogella.exception.BaseResponse
 import java.io.Serializable
 
 /**
  * Created by FRAMGIA\nguyen.vu.lan on 11/22/17.
  */
-class WeatherData : Serializable {
+class WeatherData(code: String, message: String) : BaseResponse(code, message) {
     var id: Int = 0
     var name: String = ""
     var cod: Int = 0
